@@ -1,0 +1,77 @@
+import numpy as np
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import math
+import seaborn as sns
+import matplotlib as mpl
+mpl.style.use('ggplot')
+
+for i in range(len(os.listdir('../input'))-1):
+    year = str(2001+i)
+    name = 'table' + year + '.csv'
+    if i == 0:
+        data = pd.read_csv('../input/'+name, encoding='shift-jis')
+    else:
+        data = pd.concat([data,pd.read_csv('../input/'+name, encoding='shift-jis')],axis=0)
+
+data = data.rename(columns = {'年':'year','月':'month','日':'day','時（UTC）':'hour','台風番号':'typhoon number'
+                              ,'台風名':'typhoon name','階級':'grade','緯度':'longitude','経度':'latitude'
+                              ,'中心気圧':'center pressure','最大風速':'max wind speed'
+                              ,'50KT長径方向':'50KT major axis direction','50KT長径':'50KT major axis diameter'
+                              ,'50KT短径':'50KT minor axis diameter','30KT長径方向':'30KT major axis direction'
+                              ,'30KT長径':'30KT major axis diameter','30KT短径':'30KT minor axis diameter','上陸':'landing'})
+                              
+                              
+
+colormap = plt.cm.RdBu
+plt.figure(figsize=(14,12))
+plt.title('Pearson Correlation of Features', y=1.05, size=15)
+sns.heatmap(data_not_duplicated.drop('typhoon name', axis=1).astype(float).corr(),linewidths=0.1,vmax=1.0, 
+            square=True, cmap=colormap, linecolor='white', annot=True)
+
+
+
+'''重複している同じ台風についてのデータを削除、その年ごとの台風発生数をプロット'''
+temp1 = data[['year', 'month', 'typhoon number']].drop_duplicates(subset='typhoon number')
+temp2 = temp1.groupby('year').count()['typhoon number']
+
+def typhoons_yearwise(size=(13, 5)):
+    plt.figure(figsize=size)
+    plt.plot(temp2, color='blue')
+    plt.title('numbers of typhoons')
+    plt.gca().get_xaxis().set_major_locator(ticker.MaxNLocator(integer=True))
+    plt.show()
+
+
+'''上陸した台風について、同様にして重複を削除、プロット'''
+temp3 = data[data['landing'] == 1][['year', 'month', 'typhoon number']].drop_duplicates(subset='typhoon number')
+temp4 = temp3.groupby('year').count()['typhoon number']
+
+def landed_typhoons_yearwise(size=(13, 5)):
+    plt.figure(figsize=size)
+    plt.plot(temp4, color='blue')
+    plt.title('numbers of landed typhoons')
+    plt.gca().get_xaxis().set_major_locator(ticker.MaxNLocator(integer=True))
+    plt.show()
+    
+
+temp5 = temp1.groupby('month').count()['typhoon number']
+
+def typhoons_monthwise(size=(13, 5)):
+    plt.figure(figsize=size)
+    plt.plot(temp5, color='blue')
+    plt.title('numbers of typhoons')
+    plt.gca().get_xaxis().set_major_locator(ticker.MaxNLocator(integer=True))
+    plt.show()
+
+
+temp6 = temp3.groupby('month').count()['typhoon number']
+
+def landed_typhoons_monthwise(size=(13, 5)):
+    plt.figure(figsize=size)
+    plt.plot(temp6, color='blue')
+    plt.title('numbers of landed typhoons')
+    plt.gca().get_xaxis().set_major_locator(ticker.MaxNLocator(integer=True))
+    plt.show()
